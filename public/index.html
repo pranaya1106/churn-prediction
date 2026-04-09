@@ -136,6 +136,66 @@
       color: #94a3b8;
     }
 
+    .feedback-form {
+      margin-top: 20px;
+      padding: 20px;
+      background: #1a1a2e;
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .feedback-form h3 {
+      font-size: 16px;
+      color: #f59e0b;
+      margin-bottom: 14px;
+    }
+
+    .feedback-form .field { margin-bottom: 12px; }
+
+    .feedback-form textarea {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .feedback-form textarea:focus { border-color: #6366f1; }
+
+    .feedback-btn {
+      margin-top: 12px;
+      width: 100%;
+      padding: 12px;
+      background: #f59e0b;
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .feedback-btn:hover { background: #d97706; }
+
+    .feedback-success {
+      margin-top: 12px;
+      padding: 12px;
+      background: #052e16;
+      border: 1px solid #22c55e;
+      border-radius: 8px;
+      color: #22c55e;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
     .error {
       margin-top: 16px;
       padding: 12px 16px;
@@ -158,11 +218,8 @@
       <div class="grid">
 
         <div class="field">
-          <label>Gender</label>
-          <select name="gender">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+          <label>Email</label>
+          <input type="email" name="email" placeholder="Enter your email" required />
         </div>
 
         <div class="field">
@@ -228,6 +285,29 @@
     </div>
 
     <div class="error" id="errorBox"></div>
+
+    <div class="feedback-form" id="feedbackForm">
+      <h3>High Risk Detected — Share Your Feedback</h3>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="fbEmail" readonly />
+      </div>
+      <div class="field">
+        <label>Reason</label>
+        <select id="fbReason">
+          <option value="High price">High price</option>
+          <option value="Poor service">Poor service</option>
+          <option value="Switching provider">Switching provider</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Message (optional)</label>
+        <textarea id="fbMessage" placeholder="Tell us more..."></textarea>
+      </div>
+      <button class="feedback-btn" id="fbSubmit">Submit Feedback</button>
+      <div class="feedback-success" id="fbSuccess">Feedback submitted. Thank you!</div>
+    </div>
   </div>
 
   <script>
@@ -237,15 +317,19 @@
       const btn = document.getElementById('submitBtn');
       const result = document.getElementById('result');
       const errorBox = document.getElementById('errorBox');
+      const feedbackForm = document.getElementById('feedbackForm');
+      const fbSuccess = document.getElementById('fbSuccess');
 
       btn.disabled = true;
       btn.textContent = 'Predicting...';
       result.style.display = 'none';
       errorBox.style.display = 'none';
+      feedbackForm.style.display = 'none';
+      fbSuccess.style.display = 'none';
 
       const formData = new FormData(this);
       const body = {
-        gender:          formData.get('gender'),
+        email:           formData.get('email'),
         tenure:          Number(formData.get('tenure')),
         monthly_charges: Number(formData.get('monthly_charges')),
         total_charges:   Number(formData.get('total_charges')),
@@ -270,12 +354,48 @@
         document.getElementById('prob').textContent = `Churn Probability: ${data.churn_probability}%`;
         result.style.display = 'block';
 
+        // Show feedback form if high risk (> 60%)
+        if (data.churn_probability > 60) {
+          document.getElementById('fbEmail').value = body.email;
+          document.getElementById('fbEmail').dataset.prob = data.churn_probability;
+          feedbackForm.style.display = 'block';
+        }
+
       } catch (err) {
         errorBox.textContent = 'Failed to connect to server. Make sure the server is running.';
         errorBox.style.display = 'block';
       } finally {
         btn.disabled = false;
         btn.textContent = 'Predict Churn';
+      }
+    });
+
+    // Feedback submit
+    document.getElementById('fbSubmit').addEventListener('click', async function() {
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      const fbBody = {
+        email: document.getElementById('fbEmail').value,
+        reason: document.getElementById('fbReason').value,
+        message: document.getElementById('fbMessage').value,
+        churn_probability: Number(document.getElementById('fbEmail').dataset.prob),
+      };
+
+      try {
+        await fetch('http://localhost:3000/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fbBody)
+        });
+        document.getElementById('fbSuccess').style.display = 'block';
+        btn.style.display = 'none';
+      } catch {
+        alert('Failed to submit feedback');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Feedback';
       }
     });
   </script>

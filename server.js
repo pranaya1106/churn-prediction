@@ -34,8 +34,8 @@ app.get('/create-table', async (_req, res) => {
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
+        email VARCHAR(100),
         age INTEGER,
-        gender VARCHAR(10),
         tenure INTEGER,
         monthly_charges NUMERIC,
         total_charges NUMERIC,
@@ -56,7 +56,7 @@ app.get('/create-table', async (_req, res) => {
 // POST /customers — add a new customer
 app.post('/customers', async (req, res) => {
   const {
-    name, age, gender, tenure, monthly_charges,
+    name, email, age, tenure, monthly_charges,
     total_charges, contract, internet_service,
     tech_support, payment_method, churn
   } = req.body;
@@ -64,10 +64,10 @@ app.post('/customers', async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO customers
-        (name, age, gender, tenure, monthly_charges, total_charges, contract, internet_service, tech_support, payment_method, churn)
+        (name, email, age, tenure, monthly_charges, total_charges, contract, internet_service, tech_support, payment_method, churn)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        RETURNING *`,
-      [name, age, gender, tenure, monthly_charges, total_charges, contract, internet_service, tech_support, payment_method, churn]
+      [name, email, age, tenure, monthly_charges, total_charges, contract, internet_service, tech_support, payment_method, churn]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -93,6 +93,60 @@ app.get('/customers/:id', async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch customer', details: err.message });
+  }
+});
+
+// Create feedback table
+app.get('/create-feedback-table', async (_req, res) => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS feedback (
+        id SERIAL PRIMARY KEY,
+        email TEXT,
+        reason TEXT,
+        message TEXT,
+        churn_probability NUMERIC,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    res.json({ message: 'Feedback table created successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Table creation failed', details: err.message });
+  }
+});
+
+// GET /admin-data — fetch all feedback for admin dashboard
+app.get('/admin-data', async (_req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM feedback ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch feedback', details: err.message });
+  }
+});
+
+// GET /feedback — fetch all feedback
+app.get('/feedback', async (_req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM feedback ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch feedback', details: err.message });
+  }
+});
+
+// POST /feedback — store feedback from high-risk customers
+app.post('/feedback', async (req, res) => {
+  const { email, reason, message, churn_probability } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO feedback (email, reason, message, churn_probability)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [email, reason, message, churn_probability]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save feedback', details: err.message });
   }
 });
 
