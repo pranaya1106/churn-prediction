@@ -4,6 +4,7 @@
     { "source": "/api/feedback", "destination": "/api/feedback.js" },
     { "source": "/api/admin-data", "destination": "/api/admin-data.js" },
     { "source": "/api/chat", "destination": "/api/chat.js" },
-    { "source": "/api/test-db", "destination": "/api/test-db.js" }
+    { "source": "/api/test-db", "destination": "/api/test-db.js" },
+    { "source": "/admin", "destination": "/admin.html" }
   ]
 }
