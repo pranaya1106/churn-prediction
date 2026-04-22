@@ -206,9 +206,30 @@
       color: #fca5a5;
       display: none;
     }
+
+    .admin-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #334155;
+      color: #e2e8f0;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .admin-btn:hover {
+      background: #475569;
+    }
   </style>
 </head>
 <body>
+
+  <a href="/admin" class="admin-btn">Admin Dashboard</a>
 
   <h1>Customer Churn Prediction</h1>
   <p class="subtitle">Enter customer details to predict churn probability</p>
