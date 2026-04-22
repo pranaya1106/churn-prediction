@@ -2,424 +2,1820 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Customer Churn Prediction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamVault — Unlimited Streaming</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow-x: hidden;
       min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #141414; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #e50914; }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4%;
+      height: 68px;
+      background: transparent;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+    .navbar.scrolled {
+      background: #0a0a0a;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.8);
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #e50914;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+    }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #ccc;
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .nav-icon {
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.3s ease;
+    }
+    .nav-icon:hover { opacity: 1; }
+    .btn-signin {
+      background: #e50914;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 4px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .btn-signin:hover { background: #f40612; transform: scale(1.04); }
+    .nav-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e50914, #b20710);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 600px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+    .hero-bg-img {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1600&q=80&fit=crop');
+      background-size: cover;
+      background-position: center 30%;
+      opacity: 0.55;
+    }
+    /* dark gradient over image so text stays readable */
+    .hero-bg-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(10,10,10,0.95) 0%,
+        rgba(10,10,10,0.6) 50%,
+        rgba(10,10,10,0.1) 100%
+      );
+    }
+    .hero-glow {
+      position: absolute;
+      bottom: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 400px;
+      background: radial-gradient(ellipse, rgba(229,9,20,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-bg-pattern {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 70% 40%, rgba(100,20,200,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 60%, rgba(229,9,20,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 6%;
+      max-width: 680px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(229,9,20,0.15);
+      border: 1px solid rgba(229,9,20,0.3);
+      color: #e50914;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .hero-title {
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -2px;
+      margin-bottom: 18px;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+    }
+    .hero-subtitle {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 4px; }
+    .hero-meta .rating { color: #f5c518; font-weight: 600; }
+    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-play {
+      display: flex; align-items: center; gap: 8px;
+      background: #e50914;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 6px;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 20px rgba(229,9,20,0.4);
+    }
+    .btn-play:hover {
+      background: #f40612;
+      transform: scale(1.04);
+      box-shadow: 0 6px 28px rgba(229,9,20,0.6);
+    }
+    .btn-info {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .btn-info:hover { background: rgba(255,255,255,0.2); transform: scale(1.04); }
+    .btn-churn {
+      display: flex; align-items: center; gap: 8px;
+      background: transparent;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,0.5);
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    }
+    .btn-churn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: #fff;
+      transform: scale(1.04);
+    }
+    .hero-fade {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 220px;
+      background: linear-gradient(to bottom, transparent, #0a0a0a);
+      pointer-events: none;
+    }
+
+    /* ===== CONTENT ROWS ===== */
+    .content-section { padding: 0 4% 50px; }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #e5e5e5;
+      letter-spacing: -0.3px;
+    }
+    .section-title span { color: #e50914; }
+    .row-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #333 transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+    .row-scroll::-webkit-scrollbar { height: 4px; }
+    .row-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* ===== CARDS ===== */
+    .card {
+      flex: 0 0 200px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #141414;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+      z-index: 10;
+    }
+    .card-thumb {
+      width: 200px; height: 120px;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .card-play-icon {
+      position: absolute;
+      width: 44px; height: 44px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 3;
+    }
+    .card:hover .card-play-icon { opacity: 1; }
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      opacity: 0;
+      transition: opacity 0.3s ease;
       display: flex;
       flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px;
+      z-index: 2;
+    }
+    .card:hover .card-overlay { opacity: 1; }
+    .card-overlay-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #ddd;
+    }
+    .card-overlay-rating { color: #f5c518; font-weight: 600; }
+    .card-info { padding: 10px 10px 12px; }
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e5e5e5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-genre {
+      font-size: 0.72rem;
+      color: #888;
+      margin-top: 3px;
+    }
+    /* Progress bar for "Continue Watching" */
+    .card-progress {
+      height: 3px;
+      background: #333;
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .card-progress-fill {
+      height: 100%;
+      background: #e50914;
+      border-radius: 2px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: #0d0d0d;
+      border-top: 1px solid #1a1a1a;
+      padding: 48px 6% 32px;
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+    .footer-logo { font-size: 1.4rem; font-weight: 800; color: #e50914; }
+    .footer-tagline { font-size: 0.8rem; color: #666; margin-top: 6px; }
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: #888;
+      transition: color 0.3s ease;
+    }
+    .footer-links a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid #1a1a1a;
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 40px 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-copy { font-size: 0.78rem; color: #555; }
+    .footer-badges { display: flex; gap: 10px; }
+    .footer-badge {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #2a2a2a;
+      color: #666;
     }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #f8fafc;
+    /* ===== MODAL OVERLAY ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
     }
-
-    p.subtitle {
-      color: #94a3b8;
-      margin-bottom: 32px;
-      font-size: 15px;
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
     }
-
-    .card {
-      background: #1e293b;
-      border-radius: 16px;
-      padding: 32px;
+    .modal-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
       width: 100%;
-      max-width: 600px;
-      border: 1px solid #334155;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 36px 36px 32px;
+      position: relative;
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.35s ease;
+      scrollbar-width: thin;
+      scrollbar-color: #333 transparent;
     }
+    .modal-overlay.active .modal-card {
+      transform: translateY(0) scale(1);
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 18px;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: #aaa;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .modal-header { margin-bottom: 24px; }
+    .modal-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+    .modal-header p { font-size: 0.875rem; color: #888; }
 
-    .grid {
+    /* ===== FORM ===== */
+    .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+      margin-bottom: 20px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #e50914;
+      box-shadow: 0 0 0 3px rgba(229,9,20,0.12);
+    }
+    .form-group select option { background: #1a1a1a; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-hint { font-size: 0.72rem; color: #555; margin-top: 2px; }
+
+    .btn-submit {
+      width: 100%;
+      background: #e50914;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 8px;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 20px rgba(229,9,20,0.3);
+      margin-top: 4px;
+    }
+    .btn-submit:hover {
+      background: #f40612;
+      transform: scale(1.02);
+      box-shadow: 0 6px 28px rgba(229,9,20,0.5);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .form-footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 14px;
     }
 
-    .field {
+    /* ===== LOADING SPINNER ===== */
+    .spinner-wrap {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 0;
+      gap: 18px;
     }
-
-    label {
-      font-size: 13px;
-      color: #94a3b8;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid #2a2a2a;
+      border-top-color: #e50914;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-text { font-size: 0.95rem; color: #888; }
 
-    input, select {
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #f1f5f9;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      transition: border 0.2s;
-    }
+    /* ===== RESULT SCREEN ===== */
+    .result-screen { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    input:focus, select:focus {
-      border-color: #6366f1;
-    }
-
-    select option {
-      background: #1e293b;
-    }
-
-    button {
-      margin-top: 24px;
-      width: 100%;
-      padding: 14px;
-      background: #6366f1;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button:hover { background: #4f46e5; }
-    button:disabled { background: #475569; cursor: not-allowed; }
-
-    .result {
-      margin-top: 24px;
-      padding: 20px;
-      border-radius: 12px;
+    .result-header {
       text-align: center;
-      display: none;
+      padding: 8px 0 20px;
     }
-
-    .result.churn {
-      background: #450a0a;
-      border: 1px solid #ef4444;
+    .result-icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .result-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 8px;
     }
+    .result-title.high { color: #e50914; }
+    .result-title.medium { color: #f59e0b; }
+    .result-title.low { color: #22c55e; }
+    .result-desc { font-size: 0.9rem; color: #aaa; line-height: 1.6; }
 
-    .result.no-churn {
-      background: #052e16;
-      border: 1px solid #22c55e;
+    .offer-card {
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
+    .offer-card.high { background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.25); }
+    .offer-card.medium { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
+    .offer-card.low { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); }
+    .offer-icon { font-size: 2rem; flex-shrink: 0; }
+    .offer-text h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .offer-text p { font-size: 0.82rem; color: #aaa; }
 
-    .result .label {
-      font-size: 13px;
+    /* Progress bar */
+    .prob-section { margin: 20px 0; }
+    .prob-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+    .prob-bar-bg {
+      height: 8px;
+      background: #2a2a2a;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .prob-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 1s ease;
+    }
+    .prob-bar-fill.high { background: linear-gradient(90deg, #b20710, #e50914); }
+    .prob-bar-fill.medium { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .prob-bar-fill.low { background: linear-gradient(90deg, #16a34a, #22c55e); }
+
+    /* Feedback form inside result */
+    .feedback-section { margin-top: 20px; }
+    .feedback-section h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #aaa;
+      margin-bottom: 12px;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-      color: #94a3b8;
+      letter-spacing: 0.4px;
     }
 
-    .result .verdict {
-      font-size: 26px;
+    .btn-result {
+      width: 100%;
+      font-size: 1rem;
       font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .result.churn .verdict { color: #ef4444; }
-    .result.no-churn .verdict { color: #22c55e; }
-
-    .result .prob {
-      font-size: 14px;
-      color: #94a3b8;
-    }
-
-    .feedback-form {
+      padding: 14px;
+      border-radius: 8px;
       margin-top: 20px;
-      padding: 20px;
-      background: #1a1a2e;
-      border: 1px solid #f59e0b;
-      border-radius: 12px;
-      display: none;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
     }
-
-    .feedback-form h3 {
-      font-size: 16px;
-      color: #f59e0b;
-      margin-bottom: 14px;
+    .btn-result:hover { transform: scale(1.02); }
+    .btn-result.high {
+      background: #e50914;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(229,9,20,0.35);
     }
-
-    .feedback-form .field { margin-bottom: 12px; }
-
-    .feedback-form textarea {
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #f1f5f9;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      width: 100%;
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    .feedback-form textarea:focus { border-color: #6366f1; }
-
-    .feedback-btn {
-      margin-top: 12px;
-      width: 100%;
-      padding: 12px;
+    .btn-result.high:hover { box-shadow: 0 6px 28px rgba(229,9,20,0.55); }
+    .btn-result.medium {
       background: #f59e0b;
-      color: #0f172a;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
+      color: #000;
+      box-shadow: 0 4px 20px rgba(245,158,11,0.35);
     }
-
-    .feedback-btn:hover { background: #d97706; }
-
-    .feedback-success {
-      margin-top: 12px;
-      padding: 12px;
-      background: #052e16;
-      border: 1px solid #22c55e;
-      border-radius: 8px;
-      color: #22c55e;
-      font-size: 14px;
-      text-align: center;
-      display: none;
+    .btn-result.medium:hover { box-shadow: 0 6px 28px rgba(245,158,11,0.55); }
+    .btn-result.low {
+      background: #22c55e;
+      color: #000;
+      box-shadow: 0 4px 20px rgba(34,197,94,0.35);
     }
+    .btn-result.low:hover { box-shadow: 0 6px 28px rgba(34,197,94,0.55); }
 
-    .error {
-      margin-top: 16px;
-      padding: 12px 16px;
-      background: #450a0a;
-      border: 1px solid #ef4444;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #fca5a5;
-      display: none;
-    }
-
-    .admin-btn {
+    /* ===== TOAST ===== */
+    .toast-container {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 10px 20px;
-      background: #334155;
-      color: #e2e8f0;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      transition: background 0.2s;
+      top: 80px; right: 20px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 260px;
+      max-width: 340px;
+      pointer-events: all;
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.hide { transform: translateX(120%); transition: transform 0.3s ease; }
+    .toast-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .toast-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px;
+      border-radius: 0 0 10px 10px;
+      background: #e50914;
+      animation: toastBar 4s linear forwards;
+    }
+    @keyframes toastBar { from { width: 100%; } to { width: 0%; } }
+
+    /* ===== ADMIN PANEL ===== */
+    #adminPanel {
+      position: fixed;
+      inset: 0;
+      z-index: 4000;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
+    }
+    #adminPanel.open { transform: translateX(0); }
+
+    /* Admin login */
+    .ap-login {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .ap-login-card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .ap-login-card .ap-lock { font-size: 2.5rem; margin-bottom: 14px; }
+    .ap-login-card h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .ap-login-card p { font-size: 0.85rem; color: #666; margin-bottom: 24px; }
+    .ap-login-card input {
+      width: 100%; background: #0a0a0a; border: 1px solid #2a2a2a;
+      border-radius: 8px; color: #fff; padding: 12px 14px;
+      font-size: 0.9rem; font-family: inherit; outline: none;
+      margin-bottom: 12px; transition: border-color 0.3s;
+    }
+    .ap-login-card input:focus { border-color: #e50914; }
+    .ap-login-btn {
+      width: 100%; background: #e50914; color: #fff;
+      font-size: 0.95rem; font-weight: 700; padding: 13px;
+      border-radius: 8px; font-family: inherit;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .ap-login-btn:hover { background: #f40612; transform: scale(1.02); }
+    .ap-login-err {
+      margin-top: 10px; padding: 9px 14px;
+      background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3);
+      border-radius: 6px; color: #fca5a5; font-size: 0.8rem; display: none;
     }
 
-    .admin-btn:hover {
-      background: #475569;
+    /* Admin topbar */
+    .ap-topbar {
+      height: 60px; background: #141414;
+      border-bottom: 1px solid #1f1f1f;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 28px; flex-shrink: 0;
+    }
+    .ap-topbar .ap-brand { font-size: 1rem; font-weight: 800; }
+    .ap-topbar .ap-brand span { color: #e50914; }
+    .ap-topbar-right { display: flex; align-items: center; gap: 14px; }
+    .ap-close-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid #2a2a2a;
+      color: #aaa; padding: 7px 16px; border-radius: 8px;
+      font-size: 0.82rem; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .ap-close-btn:hover { border-color: #e50914; color: #e50914; }
+    .ap-logout-btn {
+      background: transparent; border: 1px solid #2a2a2a;
+      color: #666; padding: 7px 16px; border-radius: 8px;
+      font-size: 0.82rem; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .ap-logout-btn:hover { border-color: #555; color: #aaa; }
+
+    /* Admin body */
+    .ap-body {
+      flex: 1; overflow-y: auto; padding: 28px 28px 40px;
+      scrollbar-width: thin; scrollbar-color: #2a2a2a transparent;
+    }
+    .ap-page-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+    .ap-page-sub { font-size: 0.82rem; color: #555; margin-bottom: 24px; }
+
+    /* KPI grid */
+    .ap-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .ap-kpi {
+      background: #141414; border: 1px solid #1f1f1f;
+      border-radius: 12px; padding: 18px 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ap-kpi:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .ap-kpi-icon { font-size: 1.3rem; margin-bottom: 10px; }
+    .ap-kpi-val { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+    .ap-kpi-lbl { font-size: 0.72rem; color: #555; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ap-kpi.k-red   { border-color: rgba(229,9,20,0.25); }
+    .ap-kpi.k-amber { border-color: rgba(245,158,11,0.25); }
+    .ap-kpi.k-green { border-color: rgba(34,197,94,0.25); }
+    .ap-kpi.k-blue  { border-color: rgba(99,102,241,0.25); }
+
+    /* Charts */
+    .ap-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .ap-chart-card {
+      background: #141414; border: 1px solid #1f1f1f;
+      border-radius: 12px; padding: 20px;
+    }
+    .ap-chart-card h4 {
+      font-size: 0.75rem; font-weight: 600; color: #555;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;
+    }
+    .ap-chart-card canvas { max-height: 180px; }
+
+    /* Table */
+    .ap-table-card {
+      background: #141414; border: 1px solid #1f1f1f;
+      border-radius: 12px; overflow: hidden;
+    }
+    .ap-table-hdr {
+      padding: 16px 20px; border-bottom: 1px solid #1f1f1f;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .ap-table-hdr h4 { font-size: 0.95rem; font-weight: 700; }
+    .ap-table-hdr span { font-size: 0.78rem; color: #555; }
+    .ap-table { width: 100%; border-collapse: collapse; }
+    .ap-table th {
+      background: #1a1a1a; padding: 10px 16px;
+      text-align: left; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.5px; color: #555; font-weight: 600;
+    }
+    .ap-table td { padding: 12px 16px; font-size: 0.82rem; border-top: 1px solid #1a1a1a; }
+    .ap-table tr:hover td { background: #1a1a1a; }
+    .ap-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 9px; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 700;
+    }
+    .ap-badge-high   { background: rgba(229,9,20,0.12);   border: 1px solid rgba(229,9,20,0.3);   color: #e50914; }
+    .ap-badge-medium { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+    .ap-badge-low    { background: rgba(34,197,94,0.12);  border: 1px solid rgba(34,197,94,0.3);  color: #22c55e; }
+    .ap-empty { text-align: center; color: #333; padding: 40px; font-size: 0.9rem; }
+
+    /* Chatbot inside admin */
+    .ap-chat-fab {
+      position: fixed; bottom: 24px; right: 24px;
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #e50914; color: #fff; font-size: 1.2rem;
+      box-shadow: 0 4px 20px rgba(229,9,20,0.4);
+      display: none; align-items: center; justify-content: center;
+      z-index: 4100; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ap-chat-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(229,9,20,0.6); }
+    .ap-chat-fab.visible { display: flex; }
+    .ap-chat-win {
+      position: fixed; bottom: 84px; right: 24px;
+      width: 340px; background: #141414;
+      border: 1px solid #2a2a2a; border-radius: 14px;
+      overflow: hidden; z-index: 4100;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+      display: none; flex-direction: column;
+    }
+    .ap-chat-win.open { display: flex; }
+    .ap-chat-hdr { background: #e50914; padding: 13px 16px; font-size: 0.88rem; font-weight: 700; }
+    .ap-chat-msgs {
+      height: 240px; overflow-y: auto; padding: 12px;
+      display: flex; flex-direction: column; gap: 8px;
+      scrollbar-width: thin; scrollbar-color: #2a2a2a transparent;
+    }
+    .ap-msg { max-width: 85%; padding: 8px 12px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5; white-space: pre-line; }
+    .ap-msg.bot  { background: #1f1f1f; color: #ccc; align-self: flex-start; border-bottom-left-radius: 3px; }
+    .ap-msg.user { background: #e50914; color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
+    .ap-chat-input { display: flex; border-top: 1px solid #1f1f1f; }
+    .ap-chat-input input {
+      flex: 1; background: #0a0a0a; border: none; color: #fff;
+      padding: 12px 14px; font-size: 0.82rem; font-family: inherit; outline: none;
+    }
+    .ap-chat-input button {
+      background: #e50914; border: none; color: #fff;
+      padding: 12px 14px; font-size: 0.82rem; font-weight: 700;
+      font-family: inherit; transition: background 0.2s;
+    }
+    .ap-chat-input button:hover { background: #f40612; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero-content { padding: 0 5%; }
+      .hero-title { letter-spacing: -1px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .modal-card { padding: 28px 22px 24px; }
+      .footer-top { flex-direction: column; }
+      .footer-links { gap: 16px; }
+    }
+    @media (max-width: 480px) {
+      .hero-buttons { flex-direction: column; }
+      .btn-play, .btn-info { justify-content: center; }
+      .nav-right .nav-icon:not(:last-child) { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <a href="/admin" class="admin-btn">Admin Dashboard</a>
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div class="toast-container" id="toastContainer"></div>
 
-  <h1>Customer Churn Prediction</h1>
-  <p class="subtitle">Enter customer details to predict churn probability</p>
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">🎬 StreamVault</div>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Movies</a></li>
+      <li><a href="#">TV Shows</a></li>
+      <li><a href="#">My List</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="nav-icon" title="Search">🔍</span>
+      <span class="nav-icon" title="Notifications">🔔</span>
+      <div id="navAuthArea"></div>
+      <button onclick="openAdminPanel(event)" style="background:transparent;border:1px solid #333;color:#aaa;padding:7px 14px;border-radius:6px;font-size:0.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#e50914';this.style.color='#e50914'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">⚙ Admin</button>
+      <div class="nav-avatar" title="Profile" id="navAvatar">SV</div>
+    </div>
+  </nav>
 
-  <div class="card">
-    <form id="predictForm">
-      <div class="grid">
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-bg-img"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🔥 #1 on StreamVault Today</div>
+      <h1 class="hero-title">DARK<br>MATTER</h1>
+      <p class="hero-subtitle">A mind-bending sci-fi thriller about parallel universes, identity, and the roads not taken. What if you woke up in someone else's life?</p>
+      <div class="hero-meta">
+        <span class="rating">★ 8.4</span>
+        <span>2024</span>
+        <span>TV-MA</span>
+        <span>9 Episodes</span>
+        <span>Sci-Fi · Thriller</span>
+      </div>
+      <div class="hero-buttons">
+        <button class="btn-play" id="btnPlayNow">▶ Play Now</button>
+        <button class="btn-info">ℹ More Info</button>
+        <button class="btn-churn" id="btnChurnCheck" onclick="openChurnModal()">📊 Check Churn Risk</button>
+      </div>
+    </div>
+    <div class="hero-fade"></div>
+  </section>
 
-        <div class="field">
-          <label>Email</label>
-          <input type="email" name="email" placeholder="Enter your email" required />
+  <!-- ===== CONTENT ROWS ===== -->
+  <main>
+    <!-- Row 1: Trending Now -->
+    <section class="content-section">
+      <h2 class="section-title"><span>🔥</span> Trending Now</h2>
+      <div class="row-scroll" id="rowTrending"></div>
+    </section>
+
+    <!-- Row 2: Continue Watching -->
+    <section class="content-section">
+      <h2 class="section-title">▶ Continue Watching</h2>
+      <div class="row-scroll" id="rowContinue"></div>
+    </section>
+
+    <!-- Row 3: Top Picks -->
+    <section class="content-section">
+      <h2 class="section-title">⭐ Top Picks for You</h2>
+      <div class="row-scroll" id="rowTopPicks"></div>
+    </section>
+
+    <!-- Row 4: New Releases -->
+    <section class="content-section">
+      <h2 class="section-title"><span>🆕</span> New Releases</h2>
+      <div class="row-scroll" id="rowNew"></div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">🎬 StreamVault</div>
+        <div class="footer-tagline">Unlimited movies, TV shows, and more.</div>
+      </div>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Help Center</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Cookie Preferences</a>
+        <a href="#">Corporate Info</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2024 StreamVault, Inc. All rights reserved.</div>
+      <div class="footer-badges">
+        <span class="footer-badge">4K Ultra HD</span>
+        <span class="footer-badge">Dolby Atmos</span>
+        <span class="footer-badge">HDR10+</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== ADMIN PANEL ===== -->
+  <div id="adminPanel">
+
+    <!-- LOGIN STATE -->
+    <div class="ap-login" id="apLogin">
+      <div class="ap-login-card">
+        <div class="ap-lock">🔐</div>
+        <h2>Admin Access</h2>
+        <p>StreamVault Analytics Dashboard</p>
+        <input type="password" id="apPassword" placeholder="Enter admin password" autocomplete="current-password" />
+        <button class="ap-login-btn" id="apLoginBtn">Sign In to Dashboard</button>
+        <div class="ap-login-err" id="apLoginErr">Incorrect password. Please try again.</div>
+        <button onclick="closeAdminPanel()" style="margin-top:16px;background:transparent;border:none;color:#444;font-size:0.8rem;font-family:inherit;cursor:pointer;">← Back to StreamVault</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD STATE -->
+    <div id="apDashboard" style="display:none;flex-direction:column;height:100%;">
+      <div class="ap-topbar">
+        <div class="ap-brand">🎬 StreamVault <span>Admin</span></div>
+        <div class="ap-topbar-right">
+          <button class="ap-close-btn" onclick="closeAdminPanel()">← Back to Site</button>
+          <button class="ap-logout-btn" id="apLogoutBtn">Logout</button>
+        </div>
+      </div>
+      <div class="ap-body">
+        <div class="ap-page-title">Analytics Dashboard</div>
+        <div class="ap-page-sub">Customer Churn Prediction &amp; Revenue Leakage Detection</div>
+
+        <div class="ap-kpi-grid">
+          <div class="ap-kpi k-blue">
+            <div class="ap-kpi-icon">👥</div>
+            <div class="ap-kpi-val" id="apKTotal">—</div>
+            <div class="ap-kpi-lbl">Total Customers</div>
+          </div>
+          <div class="ap-kpi k-red">
+            <div class="ap-kpi-icon">🚨</div>
+            <div class="ap-kpi-val" id="apKHigh" style="color:#e50914">—</div>
+            <div class="ap-kpi-lbl">High Risk</div>
+          </div>
+          <div class="ap-kpi k-amber">
+            <div class="ap-kpi-icon">💰</div>
+            <div class="ap-kpi-val" id="apKRev" style="color:#f59e0b">—</div>
+            <div class="ap-kpi-lbl">Revenue at Risk</div>
+          </div>
+          <div class="ap-kpi k-green">
+            <div class="ap-kpi-icon">📊</div>
+            <div class="ap-kpi-val" id="apKAvg">—</div>
+            <div class="ap-kpi-lbl">Avg Churn Prob</div>
+          </div>
         </div>
 
-        <div class="field">
-          <label>Tenure (months)</label>
-          <input type="number" name="tenure" placeholder="e.g. 12" min="0" required />
+        <div class="ap-charts-grid">
+          <div class="ap-chart-card">
+            <h4>Risk Distribution</h4>
+            <canvas id="apRiskChart"></canvas>
+          </div>
+          <div class="ap-chart-card">
+            <h4>Revenue at Risk by Segment</h4>
+            <canvas id="apRevChart"></canvas>
+          </div>
+          <div class="ap-chart-card">
+            <h4>Feedback by Reason</h4>
+            <canvas id="apReasonChart"></canvas>
+          </div>
         </div>
 
-        <div class="field">
-          <label>Monthly Charges ($)</label>
-          <input type="number" name="monthly_charges" placeholder="e.g. 65.5" step="0.01" min="0" required />
+        <div class="ap-table-card">
+          <div class="ap-table-hdr">
+            <h4>Customer Records</h4>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span id="apTableCount">Loading...</span>
+              <button onclick="loadApData()" style="background:transparent;border:1px solid #2a2a2a;color:#666;padding:5px 12px;border-radius:6px;font-size:0.75rem;font-family:inherit;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#e50914';this.style.color='#e50914'" onmouseout="this.style.borderColor='#2a2a2a';this.style.color='#666'">↻ Refresh</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="ap-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Risk</th>
+                  <th>Churn %</th>
+                  <th>Revenue at Risk</th>
+                  <th>Reason</th>
+                  <th>Message</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="apTableBody">
+                <tr><td colspan="7" class="ap-empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="field">
-          <label>Total Charges ($)</label>
-          <input type="number" name="total_charges" placeholder="e.g. 786" step="0.01" min="0" required />
+  <!-- Admin Chatbot FAB -->
+  <button class="ap-chat-fab" id="apChatFab" onclick="toggleApChat()" title="Analytics Assistant">💬</button>
+  <div class="ap-chat-win" id="apChatWin">
+    <div class="ap-chat-hdr">🤖 Analytics Assistant</div>
+    <div class="ap-chat-msgs" id="apChatMsgs">
+      <div class="ap-msg bot">Hi! Ask me about churn data. Type "help" for options.</div>
+    </div>
+    <div class="ap-chat-input">
+      <input type="text" id="apChatInput" placeholder="Ask something..." />
+      <button onclick="sendApChat()">Send</button>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card" id="modalCard">
+      <button class="modal-close" id="modalClose" aria-label="Close modal">✕</button>
+      <div id="modalContent">
+        <!-- Dynamically rendered: profile form, spinner, or result screen -->
+      </div>
+    </div>
+  </div>
+
+
+<script>
+/* ============================================================
+   StreamVault — Main Application Script
+   ============================================================ */
+
+// ── Card Data ──────────────────────────────────────────────
+const GRADIENTS = [
+  'linear-gradient(135deg,#667eea,#764ba2)',
+  'linear-gradient(135deg,#f093fb,#f5576c)',
+  'linear-gradient(135deg,#4facfe,#00f2fe)',
+  'linear-gradient(135deg,#43e97b,#38f9d7)',
+  'linear-gradient(135deg,#fa709a,#fee140)',
+  'linear-gradient(135deg,#a18cd1,#fbc2eb)',
+  'linear-gradient(135deg,#ffecd2,#fcb69f)',
+  'linear-gradient(135deg,#ff9a9e,#fecfef)',
+  'linear-gradient(135deg,#a1c4fd,#c2e9fb)',
+  'linear-gradient(135deg,#fd7043,#ff8a65)',
+  'linear-gradient(135deg,#26c6da,#00acc1)',
+  'linear-gradient(135deg,#ab47bc,#7b1fa2)',
+];
+
+const TRENDING = [
+  { title: 'Oppenheimer', genre: 'Drama · History', rating: '8.9', year: '2023' },
+  { title: 'The Bear', genre: 'Drama · Comedy', rating: '8.7', year: '2023' },
+  { title: 'Succession', genre: 'Drama', rating: '8.9', year: '2023' },
+  { title: 'Severance', genre: 'Sci-Fi · Thriller', rating: '8.7', year: '2022' },
+  { title: 'The Last of Us', genre: 'Drama · Horror', rating: '8.8', year: '2023' },
+  { title: 'Andor', genre: 'Sci-Fi · Action', rating: '8.4', year: '2022' },
+  { title: 'House of Dragon', genre: 'Fantasy · Drama', rating: '8.5', year: '2022' },
+  { title: 'Beef', genre: 'Drama · Comedy', rating: '8.3', year: '2023' },
+];
+
+const CONTINUE = [
+  { title: 'Dark Matter', genre: 'Sci-Fi · Thriller', rating: '8.4', year: '2024', progress: 65 },
+  { title: 'Fallout', genre: 'Sci-Fi · Action', rating: '8.5', year: '2024', progress: 30 },
+  { title: 'Shogun', genre: 'Historical · Drama', rating: '9.0', year: '2024', progress: 80 },
+  { title: 'Baby Reindeer', genre: 'Drama · Thriller', rating: '8.2', year: '2024', progress: 50 },
+  { title: 'Ripley', genre: 'Crime · Thriller', rating: '8.3', year: '2024', progress: 20 },
+  { title: 'The Gentlemen', genre: 'Crime · Comedy', rating: '8.0', year: '2024', progress: 45 },
+];
+
+const TOP_PICKS = [
+  { title: 'Dune: Part Two', genre: 'Sci-Fi · Epic', rating: '8.6', year: '2024' },
+  { title: 'Poor Things', genre: 'Fantasy · Drama', rating: '8.0', year: '2023' },
+  { title: 'Past Lives', genre: 'Romance · Drama', rating: '7.9', year: '2023' },
+  { title: 'All of Us Strangers', genre: 'Drama · Romance', rating: '7.8', year: '2023' },
+  { title: 'Killers of the Flower Moon', genre: 'Crime · Drama', rating: '7.7', year: '2023' },
+  { title: 'The Zone of Interest', genre: 'Drama · War', rating: '7.4', year: '2023' },
+  { title: 'American Fiction', genre: 'Comedy · Drama', rating: '7.7', year: '2023' },
+  { title: 'Saltburn', genre: 'Thriller · Drama', rating: '7.4', year: '2023' },
+];
+
+const NEW_RELEASES = [
+  { title: 'A Quiet Place: Day One', genre: 'Horror · Sci-Fi', rating: '7.2', year: '2024' },
+  { title: 'Inside Out 2', genre: 'Animation · Family', rating: '7.8', year: '2024' },
+  { title: 'Alien: Romulus', genre: 'Sci-Fi · Horror', rating: '7.4', year: '2024' },
+  { title: 'Twisters', genre: 'Action · Thriller', rating: '7.0', year: '2024' },
+  { title: 'Deadpool & Wolverine', genre: 'Action · Comedy', rating: '7.9', year: '2024' },
+  { title: 'Longlegs', genre: 'Horror · Thriller', rating: '6.8', year: '2024' },
+];
+
+// ── Render Cards ───────────────────────────────────────────
+function createCard(item, index, showProgress) {
+  const grad = GRADIENTS[index % GRADIENTS.length];
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-thumb" style="background:${grad}">
+      <div class="card-play-icon">▶</div>
+      <div class="card-overlay">
+        <div class="card-overlay-meta">
+          <span class="card-overlay-rating">★ ${item.rating}</span>
+          <span>${item.year}</span>
         </div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="card-title">${item.title}</div>
+      <div class="card-genre">${item.genre}</div>
+      ${showProgress ? `<div class="card-progress"><div class="card-progress-fill" style="width:${item.progress}%"></div></div>` : ''}
+    </div>
+  `;
+  return card;
+}
 
-        <div class="field">
-          <label>Contract</label>
-          <select name="contract">
+function renderRow(containerId, data, showProgress = false) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  data.forEach((item, i) => {
+    container.appendChild(createCard(item, i, showProgress));
+  });
+}
+
+renderRow('rowTrending', TRENDING);
+renderRow('rowContinue', CONTINUE, true);
+renderRow('rowTopPicks', TOP_PICKS);
+renderRow('rowNew', NEW_RELEASES);
+
+// ── Navbar scroll effect ───────────────────────────────────
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// ── Toast System ───────────────────────────────────────────
+function showToast(message, icon = '🎬') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.position = 'relative';
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span>${message}</span>
+    <div class="toast-bar"></div>
+  `;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+
+// ── Modal System ───────────────────────────────────────────
+const modalOverlay = document.getElementById('modalOverlay');
+const modalContent = document.getElementById('modalContent');
+const modalClose   = document.getElementById('modalClose');
+let popupShown = false;
+
+function openModal() {
+  if (popupShown) return;
+  // Must be logged in
+  if (!sessionStorage.getItem('sv_user_email')) {
+    window.location.href = '/login';
+    return;
+  }
+  popupShown = true;
+  sessionStorage.setItem('sv_popup_shown', '1');
+  renderProfileForm();
+  modalOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Always opens the churn form — ignores the once-per-session guard
+function openChurnModal() {
+  if (!sessionStorage.getItem('sv_user_email')) {
+    window.location.href = '/login';
+    return;
+  }
+  renderProfileForm();
+  modalOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── Profile Form ───────────────────────────────────────────
+const PLAN_PRICES = { 'Basic': 199, 'Standard': 499, 'Premium': 799 };
+
+function renderProfileForm() {
+  const userEmail = sessionStorage.getItem('sv_user_email') || '';
+  const userName  = sessionStorage.getItem('sv_user_name')  || '';
+  modalContent.innerHTML = `
+    <div class="modal-header">
+      <h2 id="modalTitle">📊 Churn Risk Analysis</h2>
+      <p>Analysing subscription health for <strong style="color:#fff">${userEmail}</strong></p>
+    </div>
+    <form id="profileForm" novalidate>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="f_tenure">Subscriber Since (months)</label>
+          <input type="number" id="f_tenure" placeholder="e.g. 12" min="0" max="240" required />
+          <span class="form-hint">How long have you been a subscriber?</span>
+        </div>
+        <div class="form-group">
+          <label for="f_plan">Plan Type</label>
+          <select id="f_plan" required>
+            <option value="">Select plan</option>
+            <option value="Basic">Basic — ₹199/mo</option>
+            <option value="Standard">Standard — ₹499/mo</option>
+            <option value="Premium">Premium — ₹799/mo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="f_contract">Contract</label>
+          <select id="f_contract" required>
+            <option value="">Select contract</option>
             <option value="Month-to-month">Month-to-month</option>
             <option value="One year">One year</option>
             <option value="Two year">Two year</option>
           </select>
         </div>
-
-        <div class="field">
-          <label>Internet Service</label>
-          <select name="internet_service">
+        <div class="form-group">
+          <label for="f_internet">Internet Service</label>
+          <select id="f_internet" required>
+            <option value="">Select service</option>
             <option value="Fiber optic">Fiber optic</option>
             <option value="DSL">DSL</option>
-            <option value="No">No</option>
+            <option value="No">No internet service</option>
           </select>
         </div>
-
-        <div class="field">
-          <label>Tech Support</label>
-          <select name="tech_support">
+        <div class="form-group">
+          <label for="f_support">Tech Support</label>
+          <select id="f_support" required>
+            <option value="">Select option</option>
             <option value="No">No</option>
             <option value="Yes">Yes</option>
           </select>
         </div>
-
-        <div class="field">
-          <label>Payment Method</label>
-          <select name="payment_method">
+        <div class="form-group">
+          <label for="f_payment">Payment Method</label>
+          <select id="f_payment" required>
+            <option value="">Select method</option>
             <option value="Electronic check">Electronic check</option>
             <option value="Mailed check">Mailed check</option>
             <option value="Bank transfer (automatic)">Bank transfer</option>
             <option value="Credit card (automatic)">Credit card</option>
           </select>
         </div>
-
+        <div class="form-group full">
+          <label for="f_charges">Monthly Charges (₹)</label>
+          <input type="number" id="f_charges" placeholder="Auto-filled by plan" min="0" />
+          <span class="form-hint">Auto-filled when you select a plan</span>
+        </div>
       </div>
-
-      <button type="submit" id="submitBtn">Predict Churn</button>
+      <button type="submit" class="btn-submit" id="btnSubmitProfile">Analyse My Risk →</button>
+      <p class="form-footer-note">🔒 Your data is used only to personalise your experience.</p>
     </form>
+  `;
 
-    <div class="result" id="result">
-      <div class="label">Prediction Result</div>
-      <div class="verdict" id="verdict"></div>
-      <div class="prob" id="prob"></div>
-    </div>
+  // Auto-fill monthly charges on plan change
+  document.getElementById('f_plan').addEventListener('change', (e) => {
+    const price = PLAN_PRICES[e.target.value] || '';
+    document.getElementById('f_charges').value = price;
+  });
 
-    <div class="error" id="errorBox"></div>
+  document.getElementById('profileForm').addEventListener('submit', handleProfileSubmit);
+}
 
-    <div class="feedback-form" id="feedbackForm">
-      <h3>High Risk Detected — Share Your Feedback</h3>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="fbEmail" readonly />
-      </div>
-      <div class="field">
-        <label>Reason</label>
-        <select id="fbReason">
-          <option value="High price">High price</option>
-          <option value="Poor service">Poor service</option>
-          <option value="Switching provider">Switching provider</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Message (optional)</label>
-        <textarea id="fbMessage" placeholder="Tell us more..."></textarea>
-      </div>
-      <button class="feedback-btn" id="fbSubmit">Submit Feedback</button>
-      <div class="feedback-success" id="fbSuccess">Feedback submitted. Thank you!</div>
-    </div>
-  </div>
+// ── Form Submission ────────────────────────────────────────
+async function handleProfileSubmit(e) {
+  e.preventDefault();
 
-  <script>
-    document.getElementById('predictForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
+  const email    = sessionStorage.getItem('sv_user_email') || '';
+  const tenure   = parseInt(document.getElementById('f_tenure').value, 10);
+  const plan     = document.getElementById('f_plan').value;
+  const contract = document.getElementById('f_contract').value;
+  const internet = document.getElementById('f_internet').value;
+  const support  = document.getElementById('f_support').value;
+  const payment  = document.getElementById('f_payment').value;
+  const charges  = parseFloat(document.getElementById('f_charges').value) || (PLAN_PRICES[plan] || 0);
 
-      const btn = document.getElementById('submitBtn');
-      const result = document.getElementById('result');
-      const errorBox = document.getElementById('errorBox');
-      const feedbackForm = document.getElementById('feedbackForm');
-      const fbSuccess = document.getElementById('fbSuccess');
+  // Basic validation
+  if (!email || isNaN(tenure) || !plan || !contract || !internet || !support || !payment) {
+    showToast('Please fill in all required fields.', '⚠️');
+    return;
+  }
 
-      btn.disabled = true;
-      btn.textContent = 'Predicting...';
-      result.style.display = 'none';
-      errorBox.style.display = 'none';
-      feedbackForm.style.display = 'none';
-      fbSuccess.style.display = 'none';
+  const payload = {
+    email,
+    tenure,
+    plan_type: plan,
+    contract,
+    internet_service: internet,
+    tech_support: support,
+    payment_method: payment,
+    monthly_charges: charges,
+    monthly_revenue: charges,
+  };
 
-      const formData = new FormData(this);
-      const body = {
-        email:           formData.get('email'),
-        tenure:          Number(formData.get('tenure')),
-        monthly_charges: Number(formData.get('monthly_charges')),
-        total_charges:   Number(formData.get('total_charges')),
-        contract:        formData.get('contract'),
-        internet_service: formData.get('internet_service'),
-        tech_support:    formData.get('tech_support'),
-        payment_method:  formData.get('payment_method'),
-      };
+  // Show spinner
+  renderSpinner('Analysing your profile...');
 
-      try {
-        const res = await fetch('/api/predict', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        const willChurn = data.churn_prediction;
-        result.className = 'result ' + (willChurn ? 'churn' : 'no-churn');
-        document.getElementById('verdict').textContent = willChurn ? 'Likely to Churn' : 'Not Likely to Churn';
-        document.getElementById('prob').textContent = `Churn Probability: ${data.churn_probability}%`;
-        result.style.display = 'block';
-
-        // Show feedback form if high risk (> 60%)
-        if (data.churn_probability > 60) {
-          document.getElementById('fbEmail').value = body.email;
-          document.getElementById('fbEmail').dataset.prob = data.churn_probability;
-          feedbackForm.style.display = 'block';
-        }
-
-      } catch (err) {
-        errorBox.textContent = 'Failed to connect to server. Make sure the server is running.';
-        errorBox.style.display = 'block';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Predict Churn';
-      }
+  try {
+    const res = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
 
-    // Feedback submit
-    document.getElementById('fbSubmit').addEventListener('click', async function() {
-      const btn = this;
-      btn.disabled = true;
-      btn.textContent = 'Submitting...';
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    const data = await res.json();
+    renderResult(data, email, charges);
+  } catch (err) {
+    console.error('Predict error:', err);
+    // Graceful fallback: simulate a result for demo purposes
+    const fallback = simulatePredict(payload);
+    renderResult(fallback, email, charges);
+  }
+}
 
-      const fbBody = {
-        email: document.getElementById('fbEmail').value,
-        reason: document.getElementById('fbReason').value,
-        message: document.getElementById('fbMessage').value,
-        churn_probability: Number(document.getElementById('fbEmail').dataset.prob),
-      };
+// Fallback scoring (mirrors server logic) for offline/demo use
+function simulatePredict(data) {
+  let score = 0;
+  if (data.contract === 'Month-to-month') score += 35;
+  else if (data.contract === 'One year') score += 10;
+  else if (data.contract === 'Two year') score -= 10;
+  if (data.tenure < 6) score += 20;
+  else if (data.tenure < 12) score += 10;
+  else if (data.tenure < 24) score += 5;
+  else if (data.tenure > 48) score -= 15;
+  if (data.internet_service === 'Fiber optic') score += 15;
+  else if (data.internet_service === 'No') score -= 10;
+  if (data.tech_support === 'No') score += 10;
+  if (data.payment_method === 'Electronic check') score += 10;
+  if (data.monthly_charges > 80) score += 10;
+  else if (data.monthly_charges < 30) score -= 10;
+  const probability = Math.min(95, Math.max(5, score));
+  const risk_level = probability < 40 ? 'low' : probability < 70 ? 'medium' : 'high';
+  const revenue_at_risk = parseFloat(((probability / 100) * data.monthly_revenue).toFixed(2));
+  return { churn_probability: probability, risk_level, revenue_at_risk, monthly_revenue: data.monthly_revenue };
+}
 
-      try {
-        await fetch('/api/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(fbBody)
-        });
-        document.getElementById('fbSuccess').style.display = 'block';
-        btn.style.display = 'none';
-      } catch {
-        alert('Failed to submit feedback');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Submit Feedback';
-      }
+// ── Spinner ────────────────────────────────────────────────
+function renderSpinner(text) {
+  modalContent.innerHTML = `
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <div class="spinner-text">${text}</div>
+    </div>
+  `;
+}
+
+// ── Result Screen ──────────────────────────────────────────
+function renderResult(data, email, charges) {
+  const { churn_probability: prob, risk_level: risk, revenue_at_risk } = data;
+  const savings = Math.round((charges * 12) * 0.25); // 3 months free ≈ 25% of annual
+
+  const configs = {
+    high: {
+      icon: '🚨',
+      title: 'Special Offer Just For You!',
+      desc: "We noticed you might be considering other options. Here's an exclusive deal to keep you streaming:",
+      offerIcon: '🎁',
+      offerTitle: `Get 3 Months FREE on Annual Plan`,
+      offerDesc: `Save ₹${savings} — Exclusive retention offer for you`,
+      btnText: 'Claim Offer & Continue',
+      showFeedback: true,
+    },
+    medium: {
+      icon: '⭐',
+      title: 'Loyalty Reward Unlocked!',
+      desc: "As a valued member, you've unlocked a special loyalty bonus just for you:",
+      offerIcon: '🏆',
+      offerTitle: 'Free Upgrade to Next Plan Tier',
+      offerDesc: 'Enjoy premium features for 1 month — on us!',
+      btnText: 'Claim Reward & Continue',
+      showFeedback: true,
+    },
+    low: {
+      icon: '✅',
+      title: 'Welcome to StreamVault!',
+      desc: 'Your account is all set. Sit back, relax, and enjoy unlimited streaming!',
+      offerIcon: '🎬',
+      offerTitle: 'You\'re All Set!',
+      offerDesc: 'Explore thousands of movies and shows in 4K Ultra HD.',
+      btnText: 'Start Watching →',
+      showFeedback: false,
+    },
+  };
+
+  const cfg = configs[risk] || configs.low;
+
+  modalContent.innerHTML = `
+    <div class="result-screen">
+      <div class="result-header">
+        <div class="result-icon">${cfg.icon}</div>
+        <div class="result-title ${risk}">${cfg.title}</div>
+        <p class="result-desc">${cfg.desc}</p>
+      </div>
+
+      <div class="offer-card ${risk}">
+        <div class="offer-icon">${cfg.offerIcon}</div>
+        <div class="offer-text">
+          <h4>${cfg.offerTitle}</h4>
+          <p>${cfg.offerDesc}</p>
+        </div>
+      </div>
+
+      <div class="prob-section">
+        <div class="prob-label">
+          <span>Churn Probability</span>
+          <span>${prob}%</span>
+        </div>
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill ${risk}" id="probFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      ${cfg.showFeedback ? `
+      <div class="feedback-section">
+        <h4>Quick Feedback (Optional)</h4>
+        <div class="form-grid" style="grid-template-columns:1fr;">
+          <div class="form-group">
+            <label for="fb_reason">Reason for considering leaving</label>
+            <select id="fb_reason">
+              <option value="">Select a reason</option>
+              <option value="Price too high">Price too high</option>
+              <option value="Content not satisfying">Content not satisfying</option>
+              <option value="Technical issues">Technical issues</option>
+              <option value="Switching to competitor">Switching to competitor</option>
+              <option value="Not using enough">Not using enough</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fb_message">Additional comments</label>
+            <textarea id="fb_message" placeholder="Tell us more (optional)..."></textarea>
+          </div>
+        </div>
+      </div>
+      ` : ''}
+
+      <button class="btn-result ${risk}" id="btnResultAction">${cfg.btnText}</button>
+    </div>
+  `;
+
+  // Animate progress bar
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const fill = document.getElementById('probFill');
+      if (fill) fill.style.width = prob + '%';
     });
-  </script>
+  });
 
+  // Result button handler
+  document.getElementById('btnResultAction').addEventListener('click', async () => {
+    if (cfg.showFeedback) {
+      const reason  = document.getElementById('fb_reason')?.value || '';
+      const message = document.getElementById('fb_message')?.value || '';
+      if (reason) {
+        await submitFeedback({
+          email,
+          reason,
+          message,
+          churn_probability: prob,
+          risk_level: risk,
+          revenue_at_risk: revenue_at_risk || 0,
+          monthly_revenue: charges,
+        });
+      }
+      showToast('🎁 Your offer has been applied!', '🎁');
+    } else {
+      showToast('🎬 Enjoy StreamVault!', '🎬');
+    }
+    closeModal();
+  });
+}
+
+// ── Feedback API ───────────────────────────────────────────
+async function submitFeedback(payload) {
+  try {
+    await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.warn('Feedback submission failed (non-critical):', err);
+  }
+}
+
+// ── Trigger Logic ──────────────────────────────────────────
+// Only show once per session, and only if logged in
+if (!sessionStorage.getItem('sv_popup_shown') && sessionStorage.getItem('sv_user_email')) {
+  setTimeout(() => { if (!popupShown) openModal(); }, 8000);
+}
+
+// ── Auth state — navbar ────────────────────────────────────
+const svEmail = sessionStorage.getItem('sv_user_email');
+const svName  = sessionStorage.getItem('sv_user_name');
+const navAuthArea = document.getElementById('navAuthArea');
+const navAvatar   = document.getElementById('navAvatar');
+
+if (svEmail) {
+  // Logged in — show name + logout
+  navAvatar.textContent = svName ? svName[0].toUpperCase() : svEmail[0].toUpperCase();
+  navAuthArea.innerHTML = `
+    <span style="font-size:0.82rem;color:#aaa;margin-right:4px;">Hi, ${svName || svEmail.split('@')[0]}</span>
+    <button onclick="doLogout()" style="background:transparent;border:1px solid #333;color:#aaa;padding:7px 14px;border-radius:6px;font-size:0.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#e50914';this.style.color='#e50914'" onmouseout="this.style.borderColor='#333';this.style.color='#aaa'">Sign Out</button>
+  `;
+} else {
+  navAuthArea.innerHTML = `<button class="btn-signin" id="btnSignIn" onclick="window.location.href='/login'">Sign In</button>`;
+}
+
+function doLogout() {
+  sessionStorage.removeItem('sv_user_email');
+  sessionStorage.removeItem('sv_user_name');
+  sessionStorage.removeItem('sv_popup_shown');
+  window.location.href = '/login';
+}
+
+// Play Now button
+document.getElementById('btnPlayNow').addEventListener('click', () => {
+  if (!sessionStorage.getItem('sv_popup_shown')) {
+    openModal();
+  } else {
+    showToast('Starting playback...', '▶');
+  }
+});
+
+// ── Admin Panel ────────────────────────────────────────────
+let apToken = sessionStorage.getItem('apToken');
+const adminPanel   = document.getElementById('adminPanel');
+const apLogin      = document.getElementById('apLogin');
+const apDashboard  = document.getElementById('apDashboard');
+const apChatFab    = document.getElementById('apChatFab');
+const apChatWin    = document.getElementById('apChatWin');
+
+function openAdminPanel(e) {
+  if (e) e.preventDefault();
+  adminPanel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (apToken) showApDashboard();
+}
+
+function closeAdminPanel() {
+  adminPanel.classList.remove('open');
+  document.body.style.overflow = '';
+  apChatFab.classList.remove('visible');
+  apChatWin.classList.remove('open');
+}
+
+// Login
+document.getElementById('apPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doApLogin(); });
+document.getElementById('apLoginBtn').addEventListener('click', doApLogin);
+
+async function doApLogin() {
+  const pw  = document.getElementById('apPassword').value;
+  const err = document.getElementById('apLoginErr');
+  const btn = document.getElementById('apLoginBtn');
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    const res  = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error();
+    apToken = data.token;
+    sessionStorage.setItem('apToken', apToken);
+    showApDashboard();
+  } catch {
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In to Dashboard';
+  }
+}
+
+document.getElementById('apLogoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('apToken');
+  apToken = null;
+  apDashboard.style.display = 'none';
+  apLogin.style.display = 'flex';
+  apChatFab.classList.remove('visible');
+  apChatWin.classList.remove('open');
+  document.getElementById('apPassword').value = '';
+});
+
+function showApDashboard() {
+  apLogin.style.display = 'none';
+  apDashboard.style.display = 'flex';
+  apChatFab.classList.add('visible');
+  loadApData();
+}
+
+// ── Admin Data ─────────────────────────────────────────────
+let apRiskChart, apRevChart, apReasonChart;
+
+async function loadApData() {
+  try {
+    const res = await fetch('/api/admin-data', { headers: { 'x-admin-token': apToken } });
+    if (res.status === 401) {
+      sessionStorage.removeItem('apToken'); apToken = null;
+      apDashboard.style.display = 'none'; apLogin.style.display = 'flex'; return;
+    }
+    const { kpis, rows } = await res.json();
+
+    document.getElementById('apKTotal').textContent = kpis.total;
+    document.getElementById('apKHigh').textContent  = kpis.highRisk;
+    document.getElementById('apKRev').textContent   = '₹' + Number(kpis.totalRevenueAtRisk).toLocaleString('en-IN');
+    document.getElementById('apKAvg').textContent   = kpis.avgChurnProb + '%';
+    document.getElementById('apTableCount').textContent = kpis.total + ' record' + (kpis.total !== 1 ? 's' : '');
+
+    renderApTable(rows);
+    renderApCharts(kpis, rows);
+  } catch {
+    document.getElementById('apTableBody').innerHTML = '<tr><td colspan="7" class="ap-empty">Failed to load data.</td></tr>';
+  }
+}
+
+function renderApTable(rows) {
+  const tbody = document.getElementById('apTableBody');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="ap-empty">No records yet.</td></tr>'; return; }
+  const BADGE = {
+    high:   '<span class="ap-badge ap-badge-high">🚨 High</span>',
+    medium: '<span class="ap-badge ap-badge-medium">⚠️ Medium</span>',
+    low:    '<span class="ap-badge ap-badge-low">✅ Low</span>',
+  };
+  // Infer risk from probability if risk_level is missing
+  function inferRisk(r) {
+    if (r.risk_level) return r.risk_level;
+    const p = Number(r.churn_probability);
+    if (p >= 70) return 'high';
+    if (p >= 40) return 'medium';
+    return 'low';
+  }
+  const pc = p => p >= 70 ? '#e50914' : p >= 40 ? '#f59e0b' : '#22c55e';
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${esc(r.email||'—')}</td>
+      <td>${BADGE[inferRisk(r)]||'—'}</td>
+      <td style="font-weight:700;color:${pc(r.churn_probability)}">${r.churn_probability}%</td>
+      <td style="color:#f59e0b;font-weight:600;">₹${Number(r.revenue_at_risk||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+      <td>${esc(r.reason||'—')}</td>
+      <td style="color:#555;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(r.message||'—')}</td>
+      <td style="color:#444;">${new Date(r.created_at).toLocaleDateString('en-IN')}</td>
+    </tr>`).join('');
+}
+
+function renderApCharts(kpis, rows) {
+  if (apRiskChart)   apRiskChart.destroy();
+  if (apRevChart)    apRevChart.destroy();
+  if (apReasonChart) apReasonChart.destroy();
+
+  apRiskChart = new Chart(document.getElementById('apRiskChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{ data: [kpis.highRisk, kpis.mediumRisk, kpis.lowRisk],
+        backgroundColor: ['#e50914','#f59e0b','#22c55e'], borderColor: '#141414', borderWidth: 3 }],
+    },
+    options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#555', padding: 12 } } } },
+  });
+
+  const rev = { High: 0, Medium: 0, Low: 0 };
+  rows.forEach(r => {
+    if (r.risk_level === 'high')   rev.High   += Number(r.revenue_at_risk || 0);
+    if (r.risk_level === 'medium') rev.Medium += Number(r.revenue_at_risk || 0);
+    if (r.risk_level === 'low')    rev.Low    += Number(r.revenue_at_risk || 0);
+  });
+  apRevChart = new Chart(document.getElementById('apRevChart'), {
+    type: 'bar',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{ data: [rev.High.toFixed(2), rev.Medium.toFixed(2), rev.Low.toFixed(2)],
+        backgroundColor: ['rgba(229,9,20,0.7)','rgba(245,158,11,0.7)','rgba(34,197,94,0.7)'], borderRadius: 5 }],
+    },
+    options: { plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: '#555' }, grid: { display: false } }, y: { ticks: { color: '#555' }, grid: { color: '#1f1f1f' } } } },
+  });
+
+  const counts = {};
+  rows.forEach(r => { if (r.reason) counts[r.reason] = (counts[r.reason] || 0) + 1; });
+  apReasonChart = new Chart(document.getElementById('apReasonChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(counts),
+      datasets: [{ data: Object.values(counts),
+        backgroundColor: ['#6366f1','#f59e0b','#e50914','#22c55e','#06b6d4'], borderColor: '#141414', borderWidth: 3 }],
+    },
+    options: { cutout: '60%', plugins: { legend: { position: 'bottom', labels: { color: '#555', padding: 10 } } } },
+  });
+}
+
+// ── Admin Chatbot ──────────────────────────────────────────
+function toggleApChat() { apChatWin.classList.toggle('open'); if (apChatWin.classList.contains('open')) document.getElementById('apChatInput').focus(); }
+
+function addApMsg(text, type) {
+  const msgs = document.getElementById('apChatMsgs');
+  const d = document.createElement('div');
+  d.className = 'ap-msg ' + type; d.textContent = text;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendApChat() {
+  const input = document.getElementById('apChatInput');
+  const msg = input.value.trim(); if (!msg) return;
+  addApMsg(msg, 'user'); input.value = '';
+  try {
+    const res  = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': apToken },
+      body: JSON.stringify({ message: msg }),
+    });
+    const data = await res.json();
+    addApMsg(data.reply || 'No response.', 'bot');
+  } catch { addApMsg('Failed to connect.', 'bot'); }
+}
+document.getElementById('apChatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendApChat(); });
+
+</script>
 </body>
 </html>

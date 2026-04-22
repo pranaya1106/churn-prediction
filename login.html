@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StreamVault — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Background ── */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1600&q=80&fit=crop');
+      background-size: cover; background-position: center;
+      opacity: 0.3;
+    }
+    .bg-overlay {
+      position: fixed; inset: 0; z-index: 1;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.6), rgba(10,10,10,0.95));
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: relative; z-index: 10;
+      padding: 20px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 1.6rem; font-weight: 800; color: #e50914; text-decoration: none; }
+
+    /* ── Main ── */
+    main {
+      position: relative; z-index: 10;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    /* ── Card ── */
+    .auth-card {
+      background: rgba(20,20,20,0.95);
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 44px 40px 36px;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 0;
+      background: #111; border-radius: 8px;
+      padding: 4px; margin-bottom: 32px;
+    }
+    .tab {
+      flex: 1; padding: 10px;
+      background: transparent; border: none; color: #666;
+      font-size: 0.88rem; font-weight: 600; font-family: inherit;
+      border-radius: 6px; cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .tab.active { background: #e50914; color: #fff; }
+
+    /* ── Form ── */
+    .form-panel { display: none; }
+    .form-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+    .sub { font-size: 0.85rem; color: #666; margin-bottom: 28px; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 0.75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+    .field input {
+      width: 100%; background: #0d0d0d; border: 1px solid #2a2a2a;
+      border-radius: 8px; color: #fff; padding: 12px 14px;
+      font-size: 0.92rem; font-family: inherit; outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .field input:focus { border-color: #e50914; box-shadow: 0 0 0 3px rgba(229,9,20,0.12); }
+    .field input.err { border-color: #e50914; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .btn-primary {
+      width: 100%; background: #e50914; color: #fff;
+      font-size: 1rem; font-weight: 700; padding: 14px;
+      border: none; border-radius: 8px; font-family: inherit;
+      cursor: pointer; margin-top: 8px;
+      transition: background 0.25s, transform 0.2s, box-shadow 0.25s;
+      box-shadow: 0 4px 20px rgba(229,9,20,0.3);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover:not(:disabled) { background: #f40612; transform: scale(1.02); box-shadow: 0 6px 28px rgba(229,9,20,0.5); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Spinner */
+    .spin {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #444; font-size: 0.8rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #2a2a2a; }
+
+    .error-msg {
+      background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3);
+      border-radius: 8px; padding: 10px 14px; color: #fca5a5;
+      font-size: 0.82rem; margin-bottom: 16px; display: none;
+    }
+    .success-msg {
+      background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 8px; padding: 10px 14px; color: #86efac;
+      font-size: 0.82rem; margin-bottom: 16px; display: none;
+    }
+
+    .note { font-size: 0.75rem; color: #444; text-align: center; margin-top: 16px; line-height: 1.5; }
+    .note a { color: #888; text-decoration: underline; cursor: pointer; }
+
+    /* ── Footer ── */
+    footer {
+      position: relative; z-index: 10;
+      text-align: center; padding: 20px;
+      font-size: 0.75rem; color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+  <div class="bg-overlay"></div>
+
+  <nav>
+    <a class="logo" href="/">🎬 StreamVault</a>
+  </nav>
+
+  <main>
+    <div class="auth-card">
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" id="tabSignIn" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab" id="tabRegister" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- ── SIGN IN ── -->
+      <div class="form-panel active" id="panelSignIn">
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to continue watching</p>
+        <div class="error-msg" id="siError"></div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="siEmail" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="siPassword" placeholder="Enter your password" autocomplete="current-password" />
+        </div>
+        <button class="btn-primary" id="siBtn" onclick="doSignIn()">
+          <div class="spin" id="siSpin"></div>
+          <span id="siTxt">Sign In</span>
+        </button>
+        <p class="note">New to StreamVault? <a onclick="switchTab('register')">Create an account</a></p>
+      </div>
+
+      <!-- ── REGISTER ── -->
+      <div class="form-panel" id="panelRegister">
+        <h2>Create account</h2>
+        <p class="sub">Start your free 30-day trial</p>
+        <div class="error-msg" id="regError"></div>
+        <div class="success-msg" id="regSuccess"></div>
+        <div class="field-row">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" id="regFirst" placeholder="John" autocomplete="given-name" />
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" id="regLast" placeholder="Doe" autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="Min. 6 characters" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>Confirm Password</label>
+          <input type="password" id="regConfirm" placeholder="Repeat password" autocomplete="new-password" />
+        </div>
+        <button class="btn-primary" id="regBtn" onclick="doRegister()">
+          <div class="spin" id="regSpin"></div>
+          <span id="regTxt">Create Account</span>
+        </button>
+        <p class="note">Already have an account? <a onclick="switchTab('signin')">Sign in</a></p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>© 2024 StreamVault, Inc. All rights reserved.</footer>
+
+  <script>
+    // ── Tab switching ──
+    function switchTab(tab) {
+      document.getElementById('panelSignIn').classList.toggle('active', tab === 'signin');
+      document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('tabSignIn').classList.toggle('active', tab === 'signin');
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+    }
+
+    // ── Helpers ──
+    function showErr(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.style.display = 'block';
+    }
+    function hideErr(id) { document.getElementById(id).style.display = 'none'; }
+    function showSuccess(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.style.display = 'block';
+    }
+    function setLoading(btnId, spinId, txtId, loading, label) {
+      document.getElementById(btnId).disabled = loading;
+      document.getElementById(spinId).style.display = loading ? 'block' : 'none';
+      document.getElementById(txtId).textContent = loading ? 'Please wait...' : label;
+    }
+
+    // ── Sign In ──
+    document.getElementById('siPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doSignIn(); });
+
+    function doSignIn() {
+      hideErr('siError');
+      const email = document.getElementById('siEmail').value.trim();
+      const pass  = document.getElementById('siPassword').value;
+
+      if (!email || !pass) { showErr('siError', 'Please fill in all fields.'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('siError', 'Enter a valid email address.'); return; }
+
+      setLoading('siBtn', 'siSpin', 'siTxt', true, 'Sign In');
+
+      // Simulate auth — check localStorage for registered users
+      setTimeout(() => {
+        const users = JSON.parse(localStorage.getItem('sv_users') || '{}');
+        if (users[email] && users[email].password === pass) {
+          // Success — store session
+          sessionStorage.setItem('sv_user_email', email);
+          sessionStorage.setItem('sv_user_name', users[email].name);
+          sessionStorage.removeItem('sv_popup_shown'); // allow churn popup for this session
+          window.location.href = '/';
+        } else if (!users[email]) {
+          showErr('siError', 'No account found with this email. Please register first.');
+        } else {
+          showErr('siError', 'Incorrect password. Please try again.');
+        }
+        setLoading('siBtn', 'siSpin', 'siTxt', false, 'Sign In');
+      }, 600);
+    }
+
+    // ── Register ──
+    document.getElementById('regConfirm').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+
+    function doRegister() {
+      hideErr('regError');
+      document.getElementById('regSuccess').style.display = 'none';
+
+      const first = document.getElementById('regFirst').value.trim();
+      const last  = document.getElementById('regLast').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const pass  = document.getElementById('regPassword').value;
+      const conf  = document.getElementById('regConfirm').value;
+
+      if (!first || !email || !pass || !conf) { showErr('regError', 'Please fill in all required fields.'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('regError', 'Enter a valid email address.'); return; }
+      if (pass.length < 6) { showErr('regError', 'Password must be at least 6 characters.'); return; }
+      if (pass !== conf) { showErr('regError', 'Passwords do not match.'); return; }
+
+      setLoading('regBtn', 'regSpin', 'regTxt', true, 'Create Account');
+
+      setTimeout(() => {
+        const users = JSON.parse(localStorage.getItem('sv_users') || '{}');
+        if (users[email]) {
+          showErr('regError', 'An account with this email already exists.');
+          setLoading('regBtn', 'regSpin', 'regTxt', false, 'Create Account');
+          return;
+        }
+        // Save user
+        users[email] = { name: first + ' ' + last, password: pass };
+        localStorage.setItem('sv_users', JSON.stringify(users));
+
+        // Auto sign in
+        sessionStorage.setItem('sv_user_email', email);
+        sessionStorage.setItem('sv_user_name', first);
+        sessionStorage.removeItem('sv_popup_shown');
+        showSuccess('regSuccess', '✓ Account created! Redirecting...');
+        setTimeout(() => { window.location.href = '/'; }, 1000);
+      }, 700);
+    }
+
+    // If already logged in, redirect to home
+    if (sessionStorage.getItem('sv_user_email')) {
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

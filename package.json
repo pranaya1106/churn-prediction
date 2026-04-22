@@ -1,13 +1,13 @@
 {
-  "name": "churn-prediction",
-  "version": "1.0.0",
-  "description": "",
+  "name": "churnguard",
+  "version": "2.0.0",
+  "description": "Customer Churn Prediction & Revenue Leakage Detection System",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start":   "node server.js",
+    "migrate": "node api/migrate.js"
   },
-  "keywords": [],
+  "keywords": ["churn", "prediction", "analytics", "revenue"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

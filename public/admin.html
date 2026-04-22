@@ -3,452 +3,601 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard — Churn Feedback</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>ChurnGuard — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --surface2: #263348;
+      --border:   #334155;
+      --muted:    #64748b;
+      --text:     #f1f5f9;
+      --dim:      #94a3b8;
+      --primary:  #6366f1;
+      --ph:       #4f46e5;
+      --low:      #22c55e;
+      --mid:      #f59e0b;
+      --high:     #ef4444;
+      --radius:   14px;
+      --shadow:   0 4px 24px rgba(0,0,0,0.35);
+    }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 40px 20px;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-size: 26px;
-      margin-bottom: 6px;
-      color: #f8fafc;
-    }
-
-    p.subtitle {
-      color: #94a3b8;
-      margin-bottom: 24px;
-      font-size: 14px;
-    }
-
-    .stats {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 16px 24px;
-      flex: 1;
-      text-align: center;
-    }
-
-    .stat-card .number {
-      font-size: 28px;
-      font-weight: 700;
-      color: #f8fafc;
-    }
-
-    .stat-card .label {
-      font-size: 12px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 4px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #334155;
-    }
-
-    th {
-      background: #334155;
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #94a3b8;
-    }
-
-    td {
-      padding: 12px 16px;
-      font-size: 14px;
-      border-top: 1px solid #334155;
-    }
-
-    tr:hover { background: #263348; }
-
-    .prob-high {
-      color: #ef4444;
-      font-weight: 600;
-    }
-
-    .prob-mid {
-      color: #f59e0b;
-      font-weight: 600;
-    }
-
-    .empty-msg {
-      text-align: center;
-      color: #64748b;
-      padding: 40px;
-      font-size: 15px;
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-bottom: 24px;
-      color: #6366f1;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .back-link:hover { text-decoration: underline; }
-
-    .charts {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .chart-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
+    /* ── Login Screen ── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
       padding: 20px;
     }
-
-    .chart-card h3 {
-      font-size: 14px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      width: 100%; max-width: 380px;
+      box-shadow: var(--shadow);
       text-align: center;
     }
-    .chatbot {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 360px;
-      z-index: 100;
+    .login-card .lock { font-size: 36px; margin-bottom: 16px; }
+    .login-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .login-card p  { color: var(--dim); font-size: 14px; margin-bottom: 28px; }
+    .login-card input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 12px 16px; border-radius: 8px;
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: border-color 0.2s; margin-bottom: 14px;
+    }
+    .login-card input:focus { border-color: var(--primary); }
+    .login-btn {
+      width: 100%; padding: 13px; background: var(--primary); color: white;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: background 0.2s;
+    }
+    .login-btn:hover { background: var(--ph); }
+    .login-error {
+      margin-top: 12px; padding: 10px 14px;
+      background: #450a0a; border: 1px solid #991b1b;
+      border-radius: 8px; color: #fca5a5; font-size: 13px; display: none;
     }
 
-    .chat-toggle {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: #6366f1;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-      float: right;
-      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    /* ── Dashboard ── */
+    #dashboard { display: none; }
+
+    /* Topbar */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
     }
+    .topbar .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 700; color: var(--text);
+    }
+    .topbar .brand span { color: var(--primary); }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .topbar-right a {
+      color: var(--dim); font-size: 13px; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .topbar-right a:hover { color: var(--text); }
+    .logout-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--dim); padding: 6px 14px; border-radius: 8px;
+      font-size: 13px; font-family: inherit; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--high); color: var(--high); }
 
-    .chat-toggle:hover { background: #4f46e5; }
+    /* Main layout */
+    .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
 
-    .chat-window {
-      display: none;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 24px; font-weight: 700; }
+    .page-header p  { color: var(--dim); font-size: 14px; margin-top: 4px; }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .kpi-card .kpi-icon { font-size: 22px; margin-bottom: 12px; }
+    .kpi-card .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; }
+    .kpi-card .kpi-label { font-size: 12px; color: var(--dim); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-card.danger  { border-color: rgba(239,68,68,0.3); }
+    .kpi-card.warning { border-color: rgba(245,158,11,0.3); }
+    .kpi-card.success { border-color: rgba(34,197,94,0.3); }
+    .kpi-card.primary { border-color: rgba(99,102,241,0.3); }
+
+    /* ── Charts ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+    .chart-card h3 {
+      font-size: 13px; font-weight: 600; color: var(--dim);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 18px;
+    }
+    .chart-card canvas { max-height: 200px; }
+
+    /* ── Table ── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       overflow: hidden;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-bottom: 32px;
     }
+    .table-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-header h3 { font-size: 15px; font-weight: 600; }
+    .table-header span { font-size: 12px; color: var(--dim); }
 
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: var(--surface2);
+      padding: 11px 16px;
+      text-align: left; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.5px; color: var(--dim);
+      font-weight: 600;
+    }
+    td { padding: 13px 16px; font-size: 13px; border-top: 1px solid var(--border); }
+    tr:hover td { background: var(--surface2); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .badge-low  { background: #052e16; border: 1px solid #166534; color: var(--low); }
+    .badge-mid  { background: #1c1400; border: 1px solid #92400e; color: var(--mid); }
+    .badge-high { background: #450a0a; border: 1px solid #991b1b; color: var(--high); }
+
+    .empty-msg { text-align: center; color: var(--muted); padding: 48px; font-size: 14px; }
+
+    /* ── Chatbot ── */
+    .chatbot { position: fixed; bottom: 24px; right: 24px; width: 360px; z-index: 100; }
+    .chat-toggle {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--primary); border: none; color: white;
+      font-size: 22px; cursor: pointer; float: right;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.45);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .chat-toggle:hover { background: var(--ph); transform: scale(1.05); }
+    .chat-window {
+      display: none; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; margin-bottom: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
     .chat-window.open { display: flex; flex-direction: column; }
-
     .chat-header {
-      background: #6366f1;
-      padding: 14px 18px;
-      font-weight: 600;
-      font-size: 15px;
+      background: var(--primary); padding: 14px 18px;
+      font-weight: 600; font-size: 14px;
+      display: flex; align-items: center; gap: 8px;
     }
-
     .chat-messages {
-      height: 280px;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      height: 260px; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 8px;
     }
-
     .chat-msg {
-      max-width: 85%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.5;
-      white-space: pre-line;
+      max-width: 85%; padding: 9px 13px; border-radius: 12px;
+      font-size: 13px; line-height: 1.5; white-space: pre-line;
     }
-
-    .chat-msg.bot {
-      background: #334155;
-      color: #e2e8f0;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
+    .chat-msg.bot  { background: var(--surface2); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-input-row { display: flex; border-top: 1px solid var(--border); }
+    .chat-input-row input {
+      flex: 1; background: var(--bg); border: none;
+      padding: 13px 14px; color: var(--text); font-size: 13px;
+      font-family: inherit; outline: none;
     }
-
-    .chat-msg.user {
-      background: #6366f1;
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
+    .chat-input-row button {
+      background: var(--primary); border: none; color: white;
+      padding: 13px 16px; cursor: pointer; font-size: 13px;
+      font-weight: 600; font-family: inherit; transition: background 0.2s;
     }
+    .chat-input-row button:hover { background: var(--ph); }
 
-    .chat-input-area {
-      display: flex;
-      border-top: 1px solid #334155;
+    @media (max-width: 900px) {
+      .kpi-grid    { grid-template-columns: 1fr 1fr; }
+      .charts-grid { grid-template-columns: 1fr; }
     }
-
-    .chat-input-area input {
-      flex: 1;
-      background: #0f172a;
-      border: none;
-      padding: 14px;
-      color: #f1f5f9;
-      font-size: 14px;
-      outline: none;
-      border-radius: 0;
+    @media (max-width: 560px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .main { padding: 16px; }
     }
-
-    .chat-input-area button {
-      background: #6366f1;
-      border: none;
-      color: white;
-      padding: 14px 18px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0;
-      border-radius: 0;
-      width: auto;
-    }
-
-    .chat-input-area button:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <a class="back-link" href="/">&larr; Back to Prediction</a>
-    <h1>Admin Dashboard</h1>
-    <p class="subtitle">Feedback from high-risk churn customers</p>
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="lock">🔐</div>
+    <h2>Admin Access</h2>
+    <p>Enter your admin password to continue</p>
+    <input type="password" id="loginPassword" placeholder="Admin password" autocomplete="current-password" />
+    <button class="login-btn" id="loginBtn">Sign In</button>
+    <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+  </div>
+</div>
 
-    <div class="stats">
-      <div class="stat-card">
-        <div class="number" id="totalCount">-</div>
-        <div class="label">Total Feedback</div>
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="dashboard">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="brand">⚡ <span>ChurnGuard</span> Admin</div>
+    <div class="topbar-right">
+      <a href="/">← Prediction Tool</a>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <h1>Analytics Dashboard</h1>
+      <p>Customer Churn Prediction &amp; Revenue Leakage Detection System</p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card primary">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-value" id="kTotal">—</div>
+        <div class="kpi-label">Total Customers</div>
       </div>
-      <div class="stat-card">
-        <div class="number" id="avgProb">-</div>
-        <div class="label">Avg Churn Probability</div>
+      <div class="kpi-card danger">
+        <div class="kpi-icon">🚨</div>
+        <div class="kpi-value" id="kHigh" style="color:var(--high)">—</div>
+        <div class="kpi-label">High Risk Customers</div>
       </div>
-      <div class="stat-card">
-        <div class="number" id="topReason">-</div>
-        <div class="label">Top Reason</div>
+      <div class="kpi-card warning">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-value" id="kRevRisk" style="color:var(--mid)">—</div>
+        <div class="kpi-label">Total Revenue at Risk</div>
+      </div>
+      <div class="kpi-card success">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-value" id="kAvgProb">—</div>
+        <div class="kpi-label">Avg Churn Probability</div>
       </div>
     </div>
 
-    <div class="charts">
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Risk Distribution</h3>
+        <canvas id="riskPieChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Revenue at Risk by Segment</h3>
+        <canvas id="revenueBarChart"></canvas>
+      </div>
       <div class="chart-card">
         <h3>Feedback by Reason</h3>
         <canvas id="reasonChart"></canvas>
       </div>
-      <div class="chart-card">
-        <h3>Churn Probability Distribution</h3>
-        <canvas id="probChart"></canvas>
-      </div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Churn %</th>
-          <th>Reason</th>
-          <th>Message</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="5" class="empty-msg">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="chatbot">
-    <div class="chat-window" id="chatWindow">
-      <div class="chat-header">Admin Assistant</div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="chat-msg bot">Hi! I can help you with feedback data. Type "help" to see what I can do.</div>
+    <!-- Customer Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Customer Feedback Records</h3>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span id="tableCount">Loading...</span>
+          <button onclick="loadData()" style="background:transparent;border:1px solid var(--border);color:var(--dim);padding:5px 12px;border-radius:6px;font-size:0.75rem;font-family:inherit;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--dim)'">↻ Refresh</button>
+        </div>
       </div>
-      <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Ask something..." />
-        <button onclick="sendChat()">Send</button>
-      </div>
-    </div>
-    <button class="chat-toggle" onclick="toggleChat()">&#128172;</button>
-  </div>
-
-  <script>
-    async function loadData() {
-      try {
-        const res = await fetch('/api/admin-data');
-        const data = await res.json();
-        const tbody = document.getElementById('tableBody');
-
-        // Stats
-        document.getElementById('totalCount').textContent = data.length;
-
-        if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No feedback yet</td></tr>';
-          document.getElementById('avgProb').textContent = '-';
-          document.getElementById('topReason').textContent = '-';
-          return;
-        }
-
-        const avg = data.reduce((sum, r) => sum + Number(r.churn_probability), 0) / data.length;
-        document.getElementById('avgProb').textContent = avg.toFixed(1) + '%';
-
-        // Top reason
-        const counts = {};
-        data.forEach(r => { counts[r.reason] = (counts[r.reason] || 0) + 1; });
-        const topReason = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-        document.getElementById('topReason').textContent = topReason;
-
-        // Table rows
-        tbody.innerHTML = data.map(row => `
+      <table>
+        <thead>
           <tr>
-            <td>${row.email || '-'}</td>
-            <td class="${Number(row.churn_probability) > 80 ? 'prob-high' : 'prob-mid'}">
-              ${row.churn_probability}%
-            </td>
-            <td>${row.reason || '-'}</td>
-            <td>${row.message || '-'}</td>
-            <td>${new Date(row.created_at).toLocaleDateString()}</td>
+            <th>Email</th>
+            <th>Risk Level</th>
+            <th>Churn %</th>
+            <th>Revenue at Risk</th>
+            <th>Reason</th>
+            <th>Feedback</th>
+            <th>Date</th>
           </tr>
-        `).join('');
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="7" class="empty-msg">Loading data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-        // --- Reason Doughnut Chart ---
-        const reasonLabels = Object.keys(counts);
-        const reasonValues = Object.values(counts);
-        const reasonColors = ['#6366f1', '#f59e0b', '#ef4444', '#22c55e'];
+<!-- ══════════════ CHATBOT ══════════════ -->
+<div class="chatbot" id="chatbotWidget" style="display:none;">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">🤖 Analytics Assistant</div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg bot">Hi! I can answer questions about your churn data. Type "help" to see what I can do.</div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Ask something..." />
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()">💬</button>
+</div>
 
-        new Chart(document.getElementById('reasonChart'), {
-          type: 'doughnut',
-          data: {
-            labels: reasonLabels,
-            datasets: [{
-              data: reasonValues,
-              backgroundColor: reasonColors,
-              borderColor: '#1e293b',
-              borderWidth: 3,
-            }]
-          },
-          options: {
-            plugins: {
-              legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 12 } }
-            }
-          }
-        });
+<script>
+  // ── Auth ──
+  let adminToken = sessionStorage.getItem('adminToken');
 
-        // --- Probability Bar Chart ---
-        const ranges = { '60-70%': 0, '70-80%': 0, '80-90%': 0, '90-100%': 0 };
-        data.forEach(r => {
-          const p = Number(r.churn_probability);
-          if (p <= 70) ranges['60-70%']++;
-          else if (p <= 80) ranges['70-80%']++;
-          else if (p <= 90) ranges['80-90%']++;
-          else ranges['90-100%']++;
-        });
+  if (adminToken) showDashboard();
 
-        new Chart(document.getElementById('probChart'), {
-          type: 'bar',
-          data: {
-            labels: Object.keys(ranges),
-            datasets: [{
-              label: 'Customers',
-              data: Object.values(ranges),
-              backgroundColor: ['#22c55e', '#f59e0b', '#f97316', '#ef4444'],
-              borderRadius: 6,
-            }]
-          },
-          options: {
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
-              y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: '#334155' } }
-            }
-          }
-        });
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('adminToken');
+    adminToken = null;
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('chatbotWidget').style.display = 'none';
+    document.getElementById('loginPassword').value = '';
+  });
 
-      } catch {
-        document.getElementById('tableBody').innerHTML =
-          '<tr><td colspan="5" class="empty-msg">Failed to load data</td></tr>';
-      }
+  async function doLogin() {
+    const pw  = document.getElementById('loginPassword').value;
+    const err = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    err.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Signing in...';
+
+    try {
+      const res  = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+      adminToken = data.token;
+      sessionStorage.setItem('adminToken', adminToken);
+      showDashboard();
+    } catch {
+      err.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Sign In';
     }
+  }
 
+  function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display   = 'block';
+    document.getElementById('chatbotWidget').style.display = 'block';
     loadData();
+  }
 
-    // --- Chatbot ---
-    const chatWindow = document.getElementById('chatWindow');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
+  // ── Data Loading ──
+  let chartsInitialised = false;
+  let riskPie, revBar, reasonDoughnut;
 
-    function toggleChat() {
-      chatWindow.classList.toggle('open');
-      if (chatWindow.classList.contains('open')) chatInput.focus();
-    }
-
-    function addMessage(text, type) {
-      const div = document.createElement('div');
-      div.className = 'chat-msg ' + type;
-      div.textContent = text;
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    async function sendChat() {
-      const msg = chatInput.value.trim();
-      if (!msg) return;
-
-      addMessage(msg, 'user');
-      chatInput.value = '';
-
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg })
-        });
-        const data = await res.json();
-        addMessage(data.reply, 'bot');
-      } catch {
-        addMessage('Failed to connect to server.', 'bot');
+  async function loadData() {
+    try {
+      const res  = await fetch('/api/admin-data', {
+        headers: { 'x-admin-token': adminToken },
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem('adminToken');
+        location.reload();
+        return;
       }
+      const { kpis, rows } = await res.json();
+
+      // KPIs
+      document.getElementById('kTotal').textContent   = kpis.total;
+      document.getElementById('kHigh').textContent    = kpis.highRisk;
+      document.getElementById('kRevRisk').textContent = '₹' + Number(kpis.totalRevenueAtRisk).toLocaleString('en-IN');
+      document.getElementById('kAvgProb').textContent = kpis.avgChurnProb + '%';
+      document.getElementById('tableCount').textContent = `${kpis.total} record${kpis.total !== 1 ? 's' : ''}`;
+
+      renderTable(rows);
+      renderCharts(kpis, rows);
+    } catch {
+      document.getElementById('tableBody').innerHTML =
+        '<tr><td colspan="7" class="empty-msg">Failed to load data. Please refresh.</td></tr>';
+    }
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById('tableBody');
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No feedback records yet.</td></tr>';
+      return;
     }
 
-    chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendChat();
-    });
-  </script>
+    const BADGE = {
+      high:   '<span class="badge badge-high">🚨 High</span>',
+      medium: '<span class="badge badge-mid">⚠️ Medium</span>',
+      low:    '<span class="badge badge-low">✅ Low</span>',
+    };
 
+    function inferRisk(r) {
+      if (r.risk_level) return r.risk_level;
+      const p = Number(r.churn_probability);
+      if (p >= 70) return 'high';
+      if (p >= 40) return 'medium';
+      return 'low';
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${escHtml(r.email || '—')}</td>
+        <td>${BADGE[inferRisk(r)] || '<span class="badge badge-mid">—</span>'}</td>
+        <td style="font-weight:600; color:${probColor(r.churn_probability)}">${r.churn_probability}%</td>
+        <td style="color:var(--mid); font-weight:600;">₹${Number(r.revenue_at_risk || 0).toLocaleString('en-IN', {minimumFractionDigits:2})}</td>
+        <td>${escHtml(r.reason || '—')}</td>
+        <td style="color:var(--dim); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(r.message || '—')}</td>
+        <td style="color:var(--dim)">${new Date(r.created_at).toLocaleDateString('en-IN')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function probColor(p) {
+    if (p >= 70) return 'var(--high)';
+    if (p >= 40) return 'var(--mid)';
+    return 'var(--low)';
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderCharts(kpis, rows) {
+    const chartDefaults = {
+      plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Inter' } } } },
+    };
+
+    // Risk Pie
+    if (riskPie) riskPie.destroy();
+    riskPie = new Chart(document.getElementById('riskPieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+        datasets: [{
+          data: [kpis.highRisk, kpis.mediumRisk, kpis.lowRisk],
+          backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'],
+          borderColor: '#1e293b', borderWidth: 3,
+        }],
+      },
+      options: {
+        cutout: '65%',
+        plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 14 } } },
+      },
+    });
+
+    // Revenue Bar by risk segment
+    const revByRisk = { High: 0, Medium: 0, Low: 0 };
+    rows.forEach(r => {
+      if (r.risk_level === 'high')   revByRisk.High   += Number(r.revenue_at_risk || 0);
+      if (r.risk_level === 'medium') revByRisk.Medium += Number(r.revenue_at_risk || 0);
+      if (r.risk_level === 'low')    revByRisk.Low    += Number(r.revenue_at_risk || 0);
+    });
+
+    if (revBar) revBar.destroy();
+    revBar = new Chart(document.getElementById('revenueBarChart'), {
+      type: 'bar',
+      data: {
+        labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+        datasets: [{
+          label: 'Revenue at Risk (₹)',
+          data: [revByRisk.High.toFixed(2), revByRisk.Medium.toFixed(2), revByRisk.Low.toFixed(2)],
+          backgroundColor: ['rgba(239,68,68,0.7)', 'rgba(245,158,11,0.7)', 'rgba(34,197,94,0.7)'],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+          y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+        },
+      },
+    });
+
+    // Reason Doughnut
+    const counts = {};
+    rows.forEach(r => { if (r.reason) counts[r.reason] = (counts[r.reason] || 0) + 1; });
+    const COLORS = ['#6366f1','#f59e0b','#ef4444','#22c55e','#06b6d4'];
+
+    if (reasonDoughnut) reasonDoughnut.destroy();
+    reasonDoughnut = new Chart(document.getElementById('reasonChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(counts),
+        datasets: [{
+          data: Object.values(counts),
+          backgroundColor: COLORS,
+          borderColor: '#1e293b', borderWidth: 3,
+        }],
+      },
+      options: {
+        cutout: '60%',
+        plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 12 } } },
+      },
+    });
+  }
+
+  // ── Chatbot ──
+  const chatWindow   = document.getElementById('chatWindow');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput    = document.getElementById('chatInput');
+
+  function toggleChat() { chatWindow.classList.toggle('open'); if (chatWindow.classList.contains('open')) chatInput.focus(); }
+
+  function addMsg(text, type) {
+    const div = document.createElement('div');
+    div.className   = 'chat-msg ' + type;
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function sendChat() {
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+    addMsg(msg, 'user');
+    chatInput.value = '';
+
+    try {
+      const res  = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify({ message: msg }),
+      });
+      const data = await res.json();
+      addMsg(data.reply || 'No response.', 'bot');
+    } catch {
+      addMsg('Failed to connect.', 'bot');
+    }
+  }
+
+  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+</script>
 </body>
 </html>

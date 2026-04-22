@@ -1,10 +1,11 @@
 {
   "rewrites": [
-    { "source": "/api/predict", "destination": "/api/predict.py" },
-    { "source": "/api/feedback", "destination": "/api/feedback.js" },
-    { "source": "/api/admin-data", "destination": "/api/admin-data.js" },
-    { "source": "/api/chat", "destination": "/api/chat.js" },
-    { "source": "/api/test-db", "destination": "/api/test-db.js" },
-    { "source": "/admin", "destination": "/admin.html" }
+    { "source": "/api/predict",     "destination": "/api/predict.js" },
+    { "source": "/api/feedback",    "destination": "/api/feedback.js" },
+    { "source": "/api/admin-data",  "destination": "/api/admin-data.js" },
+    { "source": "/api/chat",        "destination": "/api/chat.js" },
+    { "source": "/api/admin-login", "destination": "/api/admin-login.js" },
+    { "source": "/admin",           "destination": "/admin.html" },
+    { "source": "/login",           "destination": "/login.html" }
   ]
 }

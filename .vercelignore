@@ -1,4 +1,8 @@
 train_model.py
+predict.py
+api/migrate.js
 WA_Fn-UseC_-Telco-Customer-Churn.csv
 node_modules
 .env
+*.pkl
+__pycache__
